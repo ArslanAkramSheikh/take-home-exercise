@@ -1,3 +1,10 @@
+```md
+## Status
+This implementation is fully runnable locally and currently has:
+- 15/15 e2e tests passing
+- 93.13% statement coverage
+- 93.36% line coverage
+
 # Time-Off Microservice
 
 A NestJS + SQLite microservice for managing employee time-off requests while treating the HCM as the source of truth for balances and employment-related time-off data.
@@ -110,4 +117,77 @@ Typical flow:
 
 ### Install dependencies
 ```bash
-npm install 
+npm install
+
+## Environment
+
+### Create a .env file:
+PORT=3000
+DB_PATH=data/timeoff.sqlite
+HCM_BASE_URL=http://localhost:3000/mock-hcm
+
+## Run the service
+### Run the service by following command in the terminal
+npm run start:dev
+
+## Testing
+
+### Run end-to-end tests
+npm run test:e2e
+
+### Run coverage
+npm run test:cov
+
+## Verified Scenarios
+
+### The current automated test suite covers:
+-Request creation and local reservation
+-Manager rejection and reservation release
+-Invalid date range rejection
+-HCM validation failure on create
+-HCM unavailability on create
+-Successful approval and HCM sync
+-Invalid double-approval attempt
+-Retry after temporary HCM apply failure
+-Rejection during retry when HCM no longer accepts the request
+-Unsupported outbox job retry behavior
+-Defensive oversubscription rejection
+-Batch sync after independent HCM balance changes
+-Drift detection when batch balance drops below reserved balance
+-Idempotent request creation
+-Reconciliation of stale local balance snapshots
+
+## Coverage
+
+### Current results:
+-Tests: 15 / 15 passing
+-Statements: 93.13%
+-Branches: 56.04%
+-Functions: 90.14%
+-Lines: 93.36%
+
+## Notes
+
+### Source of truth model
+The HCM remains the source of truth. This service uses local balance snapshots for fast reads, defensive checks, and request lifecycle integrity.
+
+### Reconciliation
+Realtime sync is the primary operational path. Reconciliation is an optional manual/admin recovery mechanism for refreshing stale local snapshots from HCM.
+
+### Drift Flag
+balanceDriftDetected currently represents a reservation safety condition where reserved balance exceeds the currently known balance. It does not represent all possible external mismatch scenarios.
+
+## Deliverables
+
+### This repository is intended to accompany:
+-the TRD
+-the test suite
+-coverage output
+-the source code implementation
+
+## Future Improvements
+-add more branch-focused tests for deeper edge-case coverage
+-add a separate snapshot mismatch flag distinct from reservation-risk drift
+-introduce stronger observability/metrics around retry flows
+-expand batch reconciliation and admin tooling
+
