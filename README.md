@@ -135,15 +135,6 @@ DB_PATH=data/timeoff.sqlite
 HCM_BASE_URL=http://localhost:3000/mock-hcm
 ```
 
-#### Optional `.env.example`
-Commit this file to the repository as `.env.example`:
-
-```env
-PORT=3000
-DB_PATH=data/timeoff.sqlite
-HCM_BASE_URL=http://localhost:3000/mock-hcm
-```
-
 ### Run the Service
 ```bash
 npm run start:dev
