@@ -144,6 +144,31 @@ describe("Time-off microservice (e2e)", () => {
     expect(String(response.body.message)).toContain("startDate");
   });
 
+  it("rejects request creation for an invalid combination of dimensions", async () => {
+    await resetFailureMode();
+
+    await request(serverUrl)
+      .post("/mock-hcm/admin/failure-mode")
+      .send({ failValidation: true })
+      .expect(201);
+
+    const response = await request(serverUrl)
+      .post("/time-off-requests")
+      .send({
+        employeeId: "emp-invalid-dim",
+        locationId: "loc-invalid",
+        startDate: "2026-10-01",
+        endDate: "2026-10-01",
+        days: 1,
+        idempotencyKey: "req-invalid-dimension-1",
+      })
+      .expect(400);
+
+    expect(String(response.body.message)).toContain("HCM");
+
+    await resetFailureMode();
+  });
+
   it("rejects request creation when HCM validation fails", async () => {
     await resetFailureMode();
 
@@ -357,28 +382,28 @@ describe("Time-off microservice (e2e)", () => {
     await resetFailureMode();
   });
 
-  it('requeues unsupported outbox job types through generic retry handling', async () => {
-  const job = await outboxRepository.save(
-    outboxRepository.create({
-      type: 'BAD_JOB_TYPE',
-      payload: { anything: 'x' },
-      status: OutboxJobStatus.PENDING,
-      attempts: 0,
-      nextRunAt: new Date(Date.now() - 60_000),
-    }),
-  );
+  it("requeues unsupported outbox job types through generic retry handling", async () => {
+    const job = await outboxRepository.save(
+      outboxRepository.create({
+        type: "BAD_JOB_TYPE",
+        payload: { anything: "x" },
+        status: OutboxJobStatus.PENDING,
+        attempts: 0,
+        nextRunAt: new Date(Date.now() - 60_000),
+      }),
+    );
 
-  await outboxService.processJob(job);
+    await outboxService.processJob(job);
 
-  const updated = await outboxRepository.findOne({
-    where: { id: job.id },
+    const updated = await outboxRepository.findOne({
+      where: { id: job.id },
+    });
+
+    expect(updated).toBeTruthy();
+    expect(updated!.status).toBe(OutboxJobStatus.PENDING);
+    expect(updated!.attempts).toBe(1);
+    expect(String(updated!.lastError)).toContain("Unsupported job type");
   });
-
-  expect(updated).toBeTruthy();
-  expect(updated!.status).toBe(OutboxJobStatus.PENDING);
-  expect(updated!.attempts).toBe(1);
-  expect(String(updated!.lastError)).toContain('Unsupported job type');
-});
 
   it("defensively rejects oversubscription even if HCM has not seen local reservations yet", async () => {
     await request(serverUrl)

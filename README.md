@@ -6,7 +6,7 @@ A NestJS + SQLite microservice for managing employee time-off requests while tre
 
 This implementation is fully runnable locally and currently has:
 
-- 15/15 end-to-end tests passing
+- 16/16 end-to-end tests passing
 - 93.13% statement coverage
 - 56.04% branch coverage
 - 90.14% function coverage
@@ -168,6 +168,7 @@ The automated test suite currently covers:
 - request creation and local reservation
 - manager rejection and reservation release
 - invalid date range rejection
+- invalid combination of dimensions rejection
 - HCM validation failure on create
 - HCM unavailability on create
 - successful approval and HCM sync
@@ -185,7 +186,7 @@ The automated test suite currently covers:
 
 Current results:
 
-- Tests: 15 / 15 passing
+- Tests: 16 / 16 passing
 - Statements: 93.13%
 - Branches: 56.04%
 - Functions: 90.14%
